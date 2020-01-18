@@ -102,8 +102,8 @@ text(locCounts, labels = locCounts[,3], cex = .8, srt = 45)
 #############################################################################
 bwplot(signal ~ factor(angle) | mac, data = offline,
        subset = posX == 2 & posY == 12
-       #& mac != "00:0f:a3:39:dd:cd",
-       & mac != "00:0f:a3:39:e1:c0",
+       & mac != "00:0f:a3:39:dd:cd",
+       # & mac != "00:0f:a3:39:e1:c0",
        layout = c(2,3))
 #############################################################################
 #############################################################################
@@ -180,9 +180,9 @@ par(parCur)
 #decision on predicting location.
 
 #remove cd
-# offlineSummary = subset(offlineSummary, mac != subMacs[2])
+offlineSummary = subset(offlineSummary, mac != subMacs[2])
 #remove co
-offlineSummary = subset(offlineSummary, mac != subMacs[1])
+# offlineSummary = subset(offlineSummary, mac != subMacs[1])
 #keep all (dont run above subsets to keep all)
 
 ############################################################################################################
@@ -193,16 +193,16 @@ offlineSummary = subset(offlineSummary, mac != subMacs[1])
 #points on the floor plan with
 
 #exclude cd
-# AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
-#                 1, 14, 33.5, 9.3, 33.5, 2.8),
-#              ncol = 2, byrow = TRUE,
-#              dimnames = list(subMacs[ -2 ], c("x", "y") ))
-
-#exclude c0
 AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
                 1, 14, 33.5, 9.3, 33.5, 2.8),
              ncol = 2, byrow = TRUE,
-             dimnames = list(subMacs[ -1 ], c("x", "y") ))
+             dimnames = list(subMacs[ -2 ], c("x", "y") ))
+
+#exclude c0
+# AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
+#                 1, 14, 33.5, 9.3, 33.5, 2.8),
+#              ncol = 2, byrow = TRUE,
+#              dimnames = list(subMacs[ -1 ], c("x", "y") ))
 
 
 #note that Row names are mac addresses
@@ -365,8 +365,9 @@ train130 = selectTrain(130, offlineSummary, m = 3)
 #######################################################
 #######################################################
 #######################################################
+#diffs = apply(trainSubset[ , 4:?], 1,
+
 findNN = function(newSignal, trainSubset) { 
-  #diffs = apply(trainSubset[ , 4:?], 1,
   diffs = apply(trainSubset[ , 4:9], 1,
                 function(x) x - newSignal)
   dists = apply(diffs, 2, function(x) sqrt(sum(x^2)) ) 
@@ -445,13 +446,13 @@ floorErrorMap = function(estXY, actualXY, trainPoints = NULL, AP = NULL){
 ########################################################
 ########################################################
 ########################################################
-# trainPoints = offlineSummary[ offlineSummary$angle == 0 & 
-#                                 offlineSummary$mac == "00:0f:a3:39:e1:c0" ,
-#                               c("posX", "posY")]
-#????????????????????????????????????
-trainPoints = offlineSummary[ offlineSummary$angle == 0 & 
-                                offlineSummary$mac == "00:0f:a3:39:e1:cD" ,
+trainPoints = offlineSummary[ offlineSummary$angle == 0 &
+                                offlineSummary$mac == "00:0f:a3:39:e1:c0" ,
                               c("posX", "posY")]
+#????????????????????????????????????
+# trainPoints = offlineSummary[ offlineSummary$angle == 0 & 
+#                                 offlineSummary$mac == "00:0f:a3:39:e1:cd" ,
+#                               c("posX", "posY")]
 #??????????????????????????????????
 ########################################################
 ########################################################
@@ -497,14 +498,14 @@ reshapeSS = function(data, varSignal = "signal",
   newDataSS = do.call("rbind", byLocation)
   return(newDataSS)
 }
+##########################################################
+##########################################################
+##########################################################
+offline = offline[ offline$mac != "00:0f:a3:39:dd:cd", ]
+##########################################################
+##########################################################
+##########################################################
 
-########################################################
-########################################################
-########################################################
-offline = offline[ offline$mac != "00:0f:a3:39:dd:c0", ]
-########################################################
-########################################################
-########################################################
 keepVars = c("posXY", "posX","posY", "orientation", "angle")
 
 onlineCVSummary = reshapeSS(offline, keepVars = keepVars, 
@@ -516,15 +517,10 @@ onlineFold = subset(onlineCVSummary,
 offlineFold = subset(offlineSummary,
                      posXY %in% permuteLocs[ , -1])
 
-########################################################
-########################################################
-########################################################
 estFold = predXY(newSignals = onlineFold[ , 6:11], 
                  newAngles = onlineFold[ , 4], 
                  offlineFold, numAngles = 1, k = 3)
-########################################################
-########################################################
-########################################################
+
 actualFold = onlineFold[ , c("posX", "posY")]
 calcError(estFold, actualFold)
 
@@ -571,6 +567,13 @@ estXYk5 = predXY(newSignals = onlineSummary[ , 6:11],
 calcError(estXYk5, actualXY)
 
 
+
+
+
+
+
+
+
 onlineFold = subset(onlineCVSummary, 
                     posXY %in% permuteLocs[ , 1])
 
@@ -602,6 +605,7 @@ for (j in 1:v) {
   }
 }
 
+
 plot(y = err, x = (1:K),  type = "l", lwd= 2,
      ylim = c(1200, 2100),
      xlab = "Number of Neighbors",
@@ -614,6 +618,7 @@ segments(x0 = 0, x1 = kMin, y0 = rmseMin, col = gray(0.4),
 segments(x0 = kMin, x1 = kMin, y0 = 1100,  y1 = rmseMin, 
          col = grey(0.4), lty = 2, lwd = 2)
 
+#mtext(kMin, side = 1, line = 1, at = kMin, col = grey(0.4))
 text(x = kMin - 2, y = rmseMin + 40, 
      label = as.character(round(rmseMin)), col = grey(0.4))
 
@@ -624,6 +629,9 @@ estXYk5 = predXY(newSignals = onlineSummary[ , 6:11],
 
 calcError(estXYk5, actualXY)
 print(calcError(estXYk5, actualXY))
+
+
+
 
 
 
