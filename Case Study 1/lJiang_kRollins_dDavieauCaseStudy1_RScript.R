@@ -17,9 +17,6 @@ processLine =
 lines = txt[ substr(txt, 1, 1) != "#" ]
 tmp = lapply(lines, processLine)
 
-#################
-#options(error = recover, warn = 1)
-#################
 tmp = lapply(lines, processLine)
 offline = as.data.frame(do.call("rbind", tmp), stringsAsFactors = FALSE) 
 
@@ -39,7 +36,6 @@ class(offline$time) = c("POSIXt", "POSIXct")
 unlist(lapply(offline, class))
 
 # eliminate unused variables
-#summary(sapply(offline[ , c("mac", "channel", "scanMac")], as.factor))
 offline = offline[ , !(names(offline) %in% c("scanMac", "posZ"))]
 
 #Round angles to nearest 8th 45 degree direction
@@ -52,9 +48,7 @@ offline$angle = roundOrientation(offline$orientation)
 with(offline, boxplot(orientation ~ angle, xlab = "nearest 45 degree angle",
                       ylab="orientation")) 
 
-#############################################################################
-#############################################################################
-#############################################################################
+
 #there is a discrepancy with the documentation.
 # keep the records from the top 7 devices
 subMacs = names(sort(table(offline$mac), decreasing = TRUE))[1:7] 
@@ -66,9 +60,7 @@ apply(macChannel, 1, function(x) sum(x > 0))
 #and channel for these 7 devices. This means we can eliminate channel from
 #offline
 offline = offline[ , "channel" != names(offline)]
-#############################################################################
-#############################################################################
-#############################################################################
+
 
 locDF = with(offline,
              by(offline, list(posX, posY), function(x) x))
@@ -105,13 +97,17 @@ locCounts = t(locCounts)
 plot(locCounts, type = "n", xlab = "", ylab = "")
 text(locCounts, labels = locCounts[,3], cex = .8, srt = 45) 
 
-
+#############################################################################
+#############################################################################
+#############################################################################
 bwplot(signal ~ factor(angle) | mac, data = offline,
        subset = posX == 2 & posY == 12
        #& mac != "00:0f:a3:39:dd:cd",
        & mac != "00:0f:a3:39:e1:c0",
        layout = c(2,3))
-
+#############################################################################
+#############################################################################
+#############################################################################
 summary(offline$signal)
 
 densityplot( ~ signal | mac + factor(angle), data = offline, subset = posX == 24 & posY == 4 , bw = 0.5, plot.points = FALSE) 
@@ -132,18 +128,18 @@ densityplot( ~ signal | mac + factor(angle), data = offline, subset = posX == 24
 #        xlab = "Mean Signal without c0", ylab = "SD Signal") 
 
 breaks = seq(-90, -30, by = 5)
-bwplot(sdSignal ~ cut(avgSignal, breaks = breaks),
-       data = offlineSummary,
-       xlab = "Mean Signal Keep co and cd ", ylab = "SD Signal") 
+# bwplot(sdSignal ~ cut(avgSignal, breaks = breaks),
+#        data = offlineSummary,
+#        xlab = "Mean Signal Keep co and cd ", ylab = "SD Signal") 
 
-#Examine the skewness of signal strength by plotting the di???erence, avgSignal - medSignal, against the number of observations. We also add a local average of the di???erence between the mean and median to better help us assess its size.
+#Examine the skewness of signal strength by plotting the difference, avgSignal - medSignal, against the number of observations. We also add a local average of the difference between the mean and median to better help us assess its size.
 with(offlineSummary,
      smoothScatter((avgSignal - medSignal) ~ num,
                    xlab = "Number of Observations",
                    ylab = "mean - median"))
 abline(h = 0, col = "#984ea3", lwd = 2)
 
-#We use loess to locally smooth the di???erences betweenthe mean and median
+#We use loess to locally smooth the differences betweenthe mean and median
 lo.obj = 
   with(offlineSummary,
        loess(diff ~ num,
@@ -178,15 +174,15 @@ par(parCur)
 ############################################################################################################
 ############################################################################################################
 ############################################################################################################
-#We ???nd that two MAC addresses have similar heat maps and these both 
+#We find that two MAC addresses have similar heat maps and these both 
 #correspond to the access point near the center of the building (i.e., x =7.5 and y =6.3).
-#We choose the ???rst of these and leave as an exercise the analysis of the impact of this
+#We choose the first of these and leave as an exercise the analysis of the impact of this
 #decision on predicting location.
 
 #remove cd
-offlineSummary = subset(offlineSummary, mac != subMacs[2])
+# offlineSummary = subset(offlineSummary, mac != subMacs[2])
 #remove co
-#offlineSummary = subset(offlineSummary, mac != subMacs[1])
+offlineSummary = subset(offlineSummary, mac != subMacs[1])
 #keep all (dont run above subsets to keep all)
 
 ############################################################################################################
@@ -194,13 +190,13 @@ offlineSummary = subset(offlineSummary, mac != subMacs[2])
 ############################################################################################################
 
 #We create a small matrix with the relevant positions for the 6 access 
-#points on the ???oor plan with
+#points on the floor plan with
 
 #exclude cd
-AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
-                1, 14, 33.5, 9.3, 33.5, 2.8),
-             ncol = 2, byrow = TRUE,
-             dimnames = list(subMacs[ -2 ], c("x", "y") ))
+# AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
+#                 1, 14, 33.5, 9.3, 33.5, 2.8),
+#              ncol = 2, byrow = TRUE,
+#              dimnames = list(subMacs[ -2 ], c("x", "y") ))
 
 #exclude c0
 AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
@@ -210,8 +206,8 @@ AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
 
 
 #note that Row names are mac addresses
-# compute the di???erence between the x coordinate and access point's x 
-#coordinate and the similar di???erence for the y coordinates
+# compute the difference between the x coordinate and access point's x 
+#coordinate and the similar difference for the y coordinates
 
 diffs = offlineSummary[ , c("posX", "posY")] - 
   AP[ offlineSummary$mac, ]
@@ -366,15 +362,20 @@ selectTrain = function(angleNewObs, signals = NULL, m = 1){
 }
 
 train130 = selectTrain(130, offlineSummary, m = 3)
-
+#######################################################
+#######################################################
+#######################################################
 findNN = function(newSignal, trainSubset) { 
+  #diffs = apply(trainSubset[ , 4:?], 1,
   diffs = apply(trainSubset[ , 4:9], 1,
                 function(x) x - newSignal)
   dists = apply(diffs, 2, function(x) sqrt(sum(x^2)) ) 
   closest = order(dists) 
   return(trainSubset[closest, 1:3 ]) 
 }
-
+#######################################################
+#######################################################
+#######################################################
 
 predXY = function(newSignals, newAngles, trainData, 
                   numAngles = 1, k = 3){
@@ -395,6 +396,20 @@ predXY = function(newSignals, newAngles, trainData,
 }
 
 
+###########################################################
+###########################################################
+###########################################################
+
+#Rows then columns [ ,6:11]
+
+# estXYk3 = predXY(newSignals = onlineSummary[ , 6:?], 
+#                  newAngles = onlineSummary[ , 4], 
+#                  offlineSummary, numAngles = 3, k = 3)
+# 
+# 
+# estXYk1 = predXY(newSignals = onlineSummary[ , 6:?], 
+#                  newAngles = onlineSummary[ , 4], 
+#                  offlineSummary, numAngles = 3, k = 1)
 
 estXYk3 = predXY(newSignals = onlineSummary[ , 6:11], 
                  newAngles = onlineSummary[ , 4], 
@@ -404,7 +419,9 @@ estXYk3 = predXY(newSignals = onlineSummary[ , 6:11],
 estXYk1 = predXY(newSignals = onlineSummary[ , 6:11], 
                  newAngles = onlineSummary[ , 4], 
                  offlineSummary, numAngles = 3, k = 1)
-
+###########################################################
+###########################################################
+###########################################################
 
 
 
@@ -425,10 +442,20 @@ floorErrorMap = function(estXY, actualXY, trainPoints = NULL, AP = NULL){
            x1 = actualXY[, 1], y1 = actualXY[ , 2],
            lwd = 2, col = "red")
 }
-
+########################################################
+########################################################
+########################################################
+# trainPoints = offlineSummary[ offlineSummary$angle == 0 & 
+#                                 offlineSummary$mac == "00:0f:a3:39:e1:c0" ,
+#                               c("posX", "posY")]
+#????????????????????????????????????
 trainPoints = offlineSummary[ offlineSummary$angle == 0 & 
-                                offlineSummary$mac == "00:0f:a3:39:e1:c0" ,
+                                offlineSummary$mac == "00:0f:a3:39:e1:cD" ,
                               c("posX", "posY")]
+#??????????????????????????????????
+########################################################
+########################################################
+########################################################
 
 
 floorErrorMap(estXYk3, onlineSummary[ , c("posX","posY")], 
@@ -471,9 +498,13 @@ reshapeSS = function(data, varSignal = "signal",
   return(newDataSS)
 }
 
-
-offline = offline[ offline$mac != "00:0f:a3:39:dd:cd", ]
-
+########################################################
+########################################################
+########################################################
+offline = offline[ offline$mac != "00:0f:a3:39:dd:c0", ]
+########################################################
+########################################################
+########################################################
 keepVars = c("posXY", "posX","posY", "orientation", "angle")
 
 onlineCVSummary = reshapeSS(offline, keepVars = keepVars, 
@@ -485,10 +516,15 @@ onlineFold = subset(onlineCVSummary,
 offlineFold = subset(offlineSummary,
                      posXY %in% permuteLocs[ , -1])
 
+########################################################
+########################################################
+########################################################
 estFold = predXY(newSignals = onlineFold[ , 6:11], 
                  newAngles = onlineFold[ , 4], 
                  offlineFold, numAngles = 1, k = 3)
-
+########################################################
+########################################################
+########################################################
 actualFold = onlineFold[ , c("posX", "posY")]
 calcError(estFold, actualFold)
 
