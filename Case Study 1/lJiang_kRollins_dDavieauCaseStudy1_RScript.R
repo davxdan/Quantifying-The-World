@@ -184,7 +184,7 @@ par(parCur)
 #decision on predicting location.
 
 #remove cd
-#offlineSummary = subset(offlineSummary, mac != subMacs[2])
+offlineSummary = subset(offlineSummary, mac != subMacs[2])
 #remove co
 #offlineSummary = subset(offlineSummary, mac != subMacs[1])
 #keep all (dont run above subsets to keep all)
@@ -214,7 +214,7 @@ AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
 #coordinate and the similar di???erence for the y coordinates
 
 diffs = offlineSummary[ , c("posX", "posY")] - 
-  AP[ offlineSummary$mac, ] 
+  AP[ offlineSummary$mac, ]
 
 #find euclidean distance
 offlineSummary$dist = sqrt(diffs[ , 1]^2 + diffs[ , 2]^2)
