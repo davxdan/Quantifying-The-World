@@ -1,3 +1,4 @@
+#Libraries
 library(fields)
 library(lattice)
 ##################Data Processing###################
@@ -118,17 +119,17 @@ densityplot( ~ signal | mac + factor(angle), data = offline, subset = posX == 24
 #Make boxplots of sdSignal for subgroups of avgSignal by
 #turning avgSignal into a categorical variable
 #We see in Figure below that the weakest signals have small standard deviations and that it appears that the SD increases with the average signal strength. If we plan to model the behavior of signal strength, then we want to take these features into consideration.
-breaks = seq(-90, -30, by = 5)
-bwplot(sdSignal ~ cut(avgSignal, breaks = breaks),
-       data = offlineSummary,
-       subset = mac != "00:0f:a3:39:dd:cd",
-       xlab = "Mean Signal without cd ", ylab = "SD Signal") 
-
-breaks = seq(-90, -30, by = 5)
-bwplot(sdSignal ~ cut(avgSignal, breaks = breaks),
-       data = offlineSummary,
-       subset = mac !="00:0f:a3:39:e1:c0",
-       xlab = "Mean Signal without c0", ylab = "SD Signal") 
+# breaks = seq(-90, -30, by = 5)
+# bwplot(sdSignal ~ cut(avgSignal, breaks = breaks),
+#        data = offlineSummary,
+#        subset = mac != "00:0f:a3:39:dd:cd",
+#        xlab = "Mean Signal without cd ", ylab = "SD Signal") 
+# 
+# breaks = seq(-90, -30, by = 5)
+# bwplot(sdSignal ~ cut(avgSignal, breaks = breaks),
+#        data = offlineSummary,
+#        subset = mac !="00:0f:a3:39:e1:c0",
+#        xlab = "Mean Signal without c0", ylab = "SD Signal") 
 
 breaks = seq(-90, -30, by = 5)
 bwplot(sdSignal ~ cut(avgSignal, breaks = breaks),
@@ -149,7 +150,7 @@ lo.obj =
              data = data.frame(diff = (avgSignal - medSignal),
                                num = num)))
 
-#Then we use the ???tted model to predict the di???erence for each value of num
+#Then we use the plotted model to predict the difference for each value of num
 #and add these predictions to the scatter plot
 lo.obj.pr = predict(lo.obj, newdata = data.frame(num = (70:120))) 
 lines(x = 70:120, y = lo.obj.pr, col = "#4daf4a", lwd = 2) 
@@ -194,15 +195,18 @@ par(parCur)
 
 #We create a small matrix with the relevant positions for the 6 access 
 #points on the ???oor plan with
-# AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
-#                 1, 14, 33.5, 9.3, 33.5, 2.8),
-#              ncol = 2, byrow = TRUE,
-#              dimnames = list(subMacs[ -2 ], c("x", "y") ))
 
+#exclude cd
 AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
                 1, 14, 33.5, 9.3, 33.5, 2.8),
              ncol = 2, byrow = TRUE,
-             dimnames = list(subMacs[-9], c("x", "y") ))
+             dimnames = list(subMacs[ -2 ], c("x", "y") ))
+
+#exclude c0
+AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
+                1, 14, 33.5, 9.3, 33.5, 2.8),
+             ncol = 2, byrow = TRUE,
+             dimnames = list(subMacs[ -1 ], c("x", "y") ))
 
 
 #note that Row names are mac addresses
