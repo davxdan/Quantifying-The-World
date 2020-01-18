@@ -107,12 +107,13 @@ text(locCounts, labels = locCounts[,3], cex = .8, srt = 45)
 
 bwplot(signal ~ factor(angle) | mac, data = offline,
        subset = posX == 2 & posY == 12
-       & mac != "00:0f:a3:39:dd:cd",
+       #& mac != "00:0f:a3:39:dd:cd",
+       & mac != "00:0f:a3:39:e1:c0",
        layout = c(2,3))
 
 summary(offline$signal)
 
-densityplot( ~ signal | mac + factor(angle), data = offline, subset = posX == 24 & posY == 4 & mac != "00:0f:a3:39:dd:cd", bw = 0.5, plot.points = FALSE) 
+densityplot( ~ signal | mac + factor(angle), data = offline, subset = posX == 24 & posY == 4 , bw = 0.5, plot.points = FALSE) 
 
 #Make boxplots of sdSignal for subgroups of avgSignal by
 #turning avgSignal into a categorical variable
@@ -121,7 +122,18 @@ breaks = seq(-90, -30, by = 5)
 bwplot(sdSignal ~ cut(avgSignal, breaks = breaks),
        data = offlineSummary,
        subset = mac != "00:0f:a3:39:dd:cd",
-       xlab = "Mean Signal", ylab = "SD Signal") 
+       xlab = "Mean Signal without cd ", ylab = "SD Signal") 
+
+breaks = seq(-90, -30, by = 5)
+bwplot(sdSignal ~ cut(avgSignal, breaks = breaks),
+       data = offlineSummary,
+       subset = mac !="00:0f:a3:39:e1:c0",
+       xlab = "Mean Signal without c0", ylab = "SD Signal") 
+
+breaks = seq(-90, -30, by = 5)
+bwplot(sdSignal ~ cut(avgSignal, breaks = breaks),
+       data = offlineSummary,
+       xlab = "Mean Signal Keep co and cd ", ylab = "SD Signal") 
 
 #Examine the skewness of signal strength by plotting the di???erence, avgSignal - medSignal, against the number of observations. We also add a local average of the di???erence between the mean and median to better help us assess its size.
 with(offlineSummary,
@@ -169,17 +181,29 @@ par(parCur)
 #correspond to the access point near the center of the building (i.e., x =7.5 and y =6.3).
 #We choose the ???rst of these and leave as an exercise the analysis of the impact of this
 #decision on predicting location.
-offlineSummary = subset(offlineSummary, mac != subMacs[2])
+
+#remove cd
+#offlineSummary = subset(offlineSummary, mac != subMacs[2])
+#remove co
+#offlineSummary = subset(offlineSummary, mac != subMacs[1])
+#keep all (dont run above subsets to keep all)
+
 ############################################################################################################
 ############################################################################################################
 ############################################################################################################
 
 #We create a small matrix with the relevant positions for the 6 access 
 #points on the ???oor plan with
+# AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
+#                 1, 14, 33.5, 9.3, 33.5, 2.8),
+#              ncol = 2, byrow = TRUE,
+#              dimnames = list(subMacs[ -2 ], c("x", "y") ))
+
 AP = matrix( c( 7.5, 6.3, 2.5, -.8, 12.8, -2.8,
                 1, 14, 33.5, 9.3, 33.5, 2.8),
              ncol = 2, byrow = TRUE,
-             dimnames = list(subMacs[ -2 ], c("x", "y") ))
+             dimnames = list(subMacs[-9], c("x", "y") ))
+
 
 #note that Row names are mac addresses
 # compute the di???erence between the x coordinate and access point's x 
