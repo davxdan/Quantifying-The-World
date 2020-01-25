@@ -19,30 +19,25 @@ womenURLs =
 
 urls = paste(ubase, womenURLs, sep="")
 
-#### Textbook Function
 extractResTable =
- 
+
   function(url = "http://www.cherryblossom.org/results/2009/09cucb-F.htm",
-           year = 1999, sex = "male", file = NULL)
+           year = 1999, sex = "female", file = NULL)
   {
     doc = htmlParse(url, encoding="UTF-8")
     
     if (year == 2000) {
-      # Get preformatted text from 4th font element
-      # The top file is ill formed so the <pre> search doesn't work.
       ff = getNodeSet(doc, "//font")
       txt = xmlValue(ff[[4]])
       els = strsplit(txt, "\r\n")[[1]]
     }
-    else if (year == 2009 & sex == "male") {
-      # Get preformatted text from <div class="Section1"> element
-      # Each line of results is in a <pre> element
-      div1 = getNodeSet(doc, "//div[@class='Section1']")
-      pres = getNodeSet(div1[[1]], "//pre")
-      els = sapply(pres, xmlValue)
+    
+    else if (year == 1999 & sex == "female") {
+      pres = getNodeSet(doc, "//pre")
+      txt = xmlValue(pres[[1]])
+      els = strsplit(txt, "\n")[[1]]   
     }
     else {
-      # Get preformatted text from <pre> elements
       pres = getNodeSet(doc, "//pre")
       txt = xmlValue(pres[[1]])
       els = strsplit(txt, "\r\n")[[1]]   
@@ -52,3 +47,23 @@ extractResTable =
     # Write the lines as a text file.
     writeLines(els, con = file)
   }
+
+years = 1999:2012
+womenTables = mapply(extractResTable, url = urls, year = years)
+
+# womenTables <- list()
+# for(i in 1:length(years)){
+#   womenTables[[i]] <- try(extractResTable(url=urls[i], year=years[i]))
+# }
+
+womenTables = mapply(extractResTable, url = urls, year = years)
+names(womenTables) = years
+sapply(womenTables, length)
+
+
+#### Confirmation that the 1999 and other years have consistent formatting
+womenTables$'1999'[1:10]
+womenTables[[2]][1:10]
+
+#### Save the outputs
+save(womenTables, file = "CBWomenTextTables.rda")
