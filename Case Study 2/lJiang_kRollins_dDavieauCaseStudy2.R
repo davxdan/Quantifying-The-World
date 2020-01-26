@@ -65,5 +65,107 @@ sapply(womenTables, length)
 womenTables$'1999'[1:10]
 womenTables[[2]][1:10]
 
-#### Save the outputs
+#### Save the outputs to R data
 save(womenTables, file = "CBWomenTextTables.rda")
+
+#### Save the outputs to text files to stay in sync with the book
+# first3 = substr(womenTables[[14]], 1,3)
+#  which(first3 == "===")
+
+els=womenTables[[14]]
+eqIndex = grep("^===", els)
+
+spacerRow = els[eqIndex]
+headerRow = els[eqIndex - 1]
+headerRow = tolower(headerRow)
+ageStart = regexpr("ag", headerRow)
+body = els[ -(1:eqIndex) ]
+age = substr(body, start = ageStart, stop = ageStart + 1)
+blankLocs = gregexpr(" ", spacerRow)
+searchLocs = c(0, blankLocs[[1]])
+
+Values = mapply(substr, list(body),
+                start = searchLocs[ -length(searchLocs)] + 1,
+                stop = searchLocs[ -1 ] - 1)
+
+findColLocs = function(spacerRow) {
+  spaceLocs = gregexpr(" ", spacerRow)[[1]]
+  rowLength = nchar(spacerRow)
+  
+  if (substring(spacerRow, rowLength, rowLength) != " ")
+    return( c(0, spaceLocs, rowLength + 1))
+  else return(c(0, spaceLocs))
+}
+
+selectCols = function(colNames, headerRow, searchLocs)
+  {
+  sapply(colNames,
+         function(name, headerRow, searchLocs)
+           {
+           startPos = regexpr(name, headerRow)[[1]]
+           if (startPos == -1)
+             return( c(NA, NA) )
+           
+           index = sum(startPos >= searchLocs)
+           c(searchLocs[index] + 1, searchLocs[index + 1] - 1)
+           },
+         headerRow = headerRow, searchLocs = searchLocs )
+  } 
+
+
+searchLocs = findColLocs(spacerRow)
+ageLoc = selectCols("ag", headerRow, searchLocs)
+ages = mapply(substr, list(body),
+              start = ageLoc[1,], stop = ageLoc[2, ])
+
+#summary(as.numeric(ages))
+
+shortColNames = c("name", "home", "ag", "gun", "net", "time")
+#Verify that age is consistent in all files
+womenTables[[1]][1:5]
+womenTables[[2]][1:5]
+####WomenTables[[3]] has no header row####
+womenTables[[3]][1:10]
+womenTables[[4]][1:5]
+womenTables[[5]][1:5]
+womenTables[[6]][1:10]
+womenTables[[7]][1:10]
+womenTables[[8]][1:10]
+womenTables[[9]][1:10]
+womenTables[[10]][1:10]
+womenTables[[11]][1:10]
+womenTables[[12]][1:10]
+womenTables[[13]][1:10]
+womenTables[[14]][1:10]
+
+locCols = selectCols(shortColNames, headerRow, searchLocs)
+
+Values = mapply(substr, list(body), start = locCols[1, ],
+                stop = locCols[2, ])
+
+#class(Values)
+colnames(Values) = shortColNames
+
+extractVariables =
+  function(file, varNames =c("name", "home", "ag", "gun",
+                             "net", "time"))
+    {
+  
+    eqIndex = grep("^===", file)
+    spacerRow = file[eqIndex]
+    headerRow = tolower(file[ eqIndex - 1 ])
+    body = file[ -(1 : eqIndex) ]
+    searchLocs = findColLocs(spacerRow)
+    locCols = selectCols(varNames, headerRow, searchLocs)
+    Values = mapply(substr, list(body), start = locCols[1, ],
+                    stop = locCols[2, ])
+    colnames(Values) = varNames
+    
+    invisible(Values) #Use invisible in place of return in a function when the returned output should not be printed.
+  }
+
+##Tee hee lets be clever
+womenTables[[3]][1:3]<-womenTables[[4]][1:3]
+womenResMat = lapply(womenTables[1:14], extractVariables)
+#length(womenResMat)
+sapply(womenResMat, nrow)
