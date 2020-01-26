@@ -107,7 +107,8 @@ selectCols = function(colNames, headerRow, searchLocs)
              return( c(NA, NA) )
            
            index = sum(startPos >= searchLocs)
-           c(searchLocs[index] + 1, searchLocs[index + 1] - 1)
+           c(searchLocs[index] + 1, searchLocs[index + 1])
+           #c(searchLocs[index] + 1, searchLocs[index + 1] - 1)
            },
          headerRow = headerRow, searchLocs = searchLocs )
   } 
@@ -154,6 +155,7 @@ extractVariables =
     eqIndex = grep("^===", file)
     spacerRow = file[eqIndex]
     headerRow = tolower(file[ eqIndex - 1 ])
+    blanks = grep("^[[:blank:]]*$", womenTables[['2005']])
     body = file[ -(1 : eqIndex) ]
     searchLocs = findColLocs(spacerRow)
     locCols = selectCols(varNames, headerRow, searchLocs)
@@ -168,4 +170,50 @@ extractVariables =
 womenTables[[3]][1:3]<-womenTables[[4]][1:3]
 womenResMat = lapply(womenTables[1:14], extractVariables)
 #length(womenResMat)
-sapply(womenResMat, nrow)
+#sapply(womenResMat, nrow)
+
+#########################Data Cleansing#######################################
+#age = sapply(womenResMat, function(x) as.numeric(x[ , 'ag']))
+#boxplot(age, ylab = "Age", xlab = "Year")
+#age<-as.numeric(womenResMat[['2012']][ , 'ag'])
+#unique(age)
+#boxplot(age, ylab = "Age", xlab = "Year")
+#sapply(age, function(x) sum(is.na(x)))
+
+###########Found that women data ages are not as terrible as the men's were.
+###########We may want to lok at NAs in 2005 and a youngster in 2001
+#i.e.
+# sapply(age, function(x) sum(is.na(x)))
+# 1999 2000 2001 2002 2003 2004 2005 2006 2007 
+# 4    1    1    5    2    2   11    3    4 
+# 2008 2009 2010 2011 2012 
+# 0    4    2    0    0 
+
+createDF =
+  function(Res, year, sex)
+  {
+    # Determine which time to use
+    # useTime = if( !is.na(Res[1, 'net']) )
+    #   Res[ , 'net']
+    # else if( !is.na(Res[1, 'gun']) )
+    #   Res[ , 'gun']
+    # else
+    #   Res[ , 'time']
+    #runTime = convertTime(useTime)
+    Results = data.frame(year = rep(year, nrow(Res)),
+                         sex = rep(sex, nrow(Res)),
+                         name = Res[ , 'name'],
+                         home = Res[ , 'home'],
+                         age = as.numeric(Res[, 'ag']),
+                         #runTime = runTime,
+                         stringsAsFactors = FALSE)
+    invisible(Results)
+  }
+
+womenDF = mapply(createDF, womenResMat, year = 1999:2012,
+               sex = rep("F", 14), SIMPLIFY = FALSE)
+
+#sapply(womenDF, function(x) sum(is.na(x$age)))
+cbWomenDF = do.call(rbind, womenDF)
+save(cbWomenDF, file = "cbWomen.rda")
+
