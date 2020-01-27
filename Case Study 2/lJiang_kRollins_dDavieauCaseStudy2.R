@@ -217,3 +217,27 @@ womenDF = mapply(createDF, womenResMat, year = 1999:2012,
 cbWomenDF = do.call(rbind, womenDF)
 save(cbWomenDF, file = "cbWomen.rda")
 
+#document records with missing ages
+missingAges<-cbWomenDF[is.na(cbWomenDF$age),]
+#missingAges
+
+#Remove records with missing ages
+cbWomenDF=cbWomenDF[! is.na(cbWomenDF[,5]),]
+# head(cbWomenDF)
+# summary(cbWomenDF$age)
+
+
+# library(ggplot2)
+# 
+# loessMod25 <- loess(age ~ year, data=cbWomenDF, span=0.25) # 25% smoothing span
+# loessMod50 <- loess(age ~ year, data=cbWomenDF, span=0.50) # 50% smoothing span
+# loessMod75 <- loess(age ~ year, data=cbWomenDF, span=0.75) # 75% smoothing span
+# smoothed25 <- predict(loessMod25) 
+# smoothed50 <- predict(loessMod50) 
+# smoothed75 <- predict(loessMod75) 
+# plot(cbWomenDF$age, x=cbWomenDF$year, type="l", main="Loess Smoothing and Prediction", xlab="Year", ylab="Age")
+# lines(smoothed25, x=cbWomenDF$year, col="red")
+# lines(smoothed50, x=cbWomenDF$year, col="green")
+# lines(smoothed75, x=cbWomenDF$year, col="blue")
+
+
