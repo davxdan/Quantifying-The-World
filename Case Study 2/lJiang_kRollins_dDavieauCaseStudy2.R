@@ -1,3 +1,4 @@
+#setwd('C:/Users/danie/Documents/GitHub/Quantifying-The-World/Case Study 2')
 library(XML)
 ubase = "http://www.cherryblossom.org/"
 
@@ -215,7 +216,7 @@ womenDF = mapply(createDF, womenResMat, year = 1999:2012,
 
 #sapply(womenDF, function(x) sum(is.na(x$age)))
 cbWomenDF = do.call(rbind, womenDF)
-save(cbWomenDF, file = "cbWomen.rda")
+
 
 #document records with missing ages
 missingAges<-cbWomenDF[is.na(cbWomenDF$age),]
@@ -223,12 +224,32 @@ missingAges<-cbWomenDF[is.na(cbWomenDF$age),]
 
 #Remove records with missing ages
 cbWomenDF=cbWomenDF[! is.na(cbWomenDF[,5]),]
-# head(cbWomenDF)
-# summary(cbWomenDF$age)
+
+save(cbWomenDF, file = "cbWomen.rda")
+
+library(RColorBrewer) 
+ls("package:RColorBrewer")
+Purples8 = brewer.pal(9, "Purples")[8] 
+Purples8A = paste(Purples8, "14", sep = "") 
+
+#Jitter amount = .5 will randomly add/subtract to make ages not overlap so much
+plot(jitter(cbWomenDF$age, amount = 0.5) ~ year, data = cbWomenDF, xlab = "Year", ylab = "Age",col=Purples8A )
+
+smoothScatter(y = cbWomenDF$age, x = cbWomenDF$year,
+               xlab = "Year", ylab = "Age")
+
+boxplot(cbWomenDF$age~cbWomenDF$year, ylab = "Age", xlab = "Year")
+
+#To see how well the simple linear model captures the relationship (or not)
+lmAge = lm(cbWomenDF$year ~ cbWomenDF$age, data = cbWomenDF) 
+lmAge$coefficients
+summary(lmAge)
+
+#Left off here
+#The summary method for class lm provides
 
 
-# library(ggplot2)
-# 
+#library(ggplot2)
 # loessMod25 <- loess(age ~ year, data=cbWomenDF, span=0.25) # 25% smoothing span
 # loessMod50 <- loess(age ~ year, data=cbWomenDF, span=0.50) # 50% smoothing span
 # loessMod75 <- loess(age ~ year, data=cbWomenDF, span=0.75) # 75% smoothing span
