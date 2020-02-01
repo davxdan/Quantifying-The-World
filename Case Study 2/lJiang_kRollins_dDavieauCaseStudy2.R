@@ -245,20 +245,39 @@ lmAge = lm(cbWomenDF$year ~ cbWomenDF$age, data = cbWomenDF)
 lmAge$coefficients
 summary(lmAge)
 
-#Left off here
-#The summary method for class lm provides
 
+age1999 = cbWomenDF[ cbWomenDF$year == 1999, "age" ]
+age2010 = cbWomenDF[ cbWomenDF$year == 2010, "age" ]
+age2012 = cbWomenDF[ cbWomenDF$year == 2012, "age" ]
 
-#library(ggplot2)
-# loessMod25 <- loess(age ~ year, data=cbWomenDF, span=0.25) # 25% smoothing span
-# loessMod50 <- loess(age ~ year, data=cbWomenDF, span=0.50) # 50% smoothing span
-# loessMod75 <- loess(age ~ year, data=cbWomenDF, span=0.75) # 75% smoothing span
-# smoothed25 <- predict(loessMod25) 
-# smoothed50 <- predict(loessMod50) 
-# smoothed75 <- predict(loessMod75) 
-# plot(cbWomenDF$age, x=cbWomenDF$year, type="l", main="Loess Smoothing and Prediction", xlab="Year", ylab="Age")
-# lines(smoothed25, x=cbWomenDF$year, col="red")
-# lines(smoothed50, x=cbWomenDF$year, col="green")
-# lines(smoothed75, x=cbWomenDF$year, col="blue")
+qqplot(age1999, age2012, pch = 19, cex = 0.5, 
+       ylim = c(10,90), xlim = c(10,90), 
+       xlab = "1999 Ages",
+       ylab = "2012 Ages", 
+       main = "Figure 1. Quantile Comparisons of Female Age for the 1999 and 2012 races"
+)
+abline(a =0, b = 1, col="red", lwd = 2)
+
+qqplot(age1999, age2010, pch = 19, cex = 0.5, 
+       ylim = c(10,90), xlim = c(10,90), 
+       xlab = "1999 Ages",
+       ylab = "2010 Ages", 
+       main = "Figure 2. Quantile Comparisons of Female Age for the 1999 and 2010 races"
+)
+abline(a =0, b = 1, col="red", lwd = 2)
+
+qqplot(age2010, age2012, pch = 19, cex = 0.5, 
+       ylim = c(10,90), xlim = c(10,90), 
+       xlab = "2010 Ages",
+       ylab = "2012 Ages", 
+       main = "Figure 3. Quantile Comparisons of Female Age for the 2010 and 2012 races"
+)
+abline(a =0, b = 1, col="red", lwd = 2)
+
+library(ggplot2)
+
+ggplot(cbWomenDF, aes(sample = cbWomenDF$age, colour = factor(cbWomenDF$year))) +
+  stat_qq() +
+  stat_qq_line()
 
 
