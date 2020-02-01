@@ -229,8 +229,8 @@ save(cbWomenDF, file = "cbWomen.rda")
 
 library(RColorBrewer) 
 ls("package:RColorBrewer")
-Purples8 = brewer.pal(9, "Purples")[8] 
-Purples8A = paste(Purples8, "14", sep = "") 
+Blues = brewer.pal(9, "Blues")[8] 
+BluesA = paste(Blues, "14", sep = "") 
 
 #Jitter amount = .5 will randomly add/subtract to make ages not overlap so much
 plot(jitter(cbWomenDF$age, amount = 0.5) ~ year, data = cbWomenDF, xlab = "Year", ylab = "Age",col=Purples8A )
@@ -280,4 +280,8 @@ ggplot(cbWomenDF, aes(sample = cbWomenDF$age, colour = factor(cbWomenDF$year))) 
   stat_qq() +
   stat_qq_line()
 
-
+p <- ggplot(cbWomenDF, aes(factor(cbWomenDF$year), cbWomenDF$age))
+p + geom_violin()
+p + geom_violin() + geom_jitter(height = .5, width = 0, aes(color = 'blue'))
+p + geom_violin(fill = "grey80", colour = "#3366FF")
+p + geom_violin() + geom_point(color='darkblue')
