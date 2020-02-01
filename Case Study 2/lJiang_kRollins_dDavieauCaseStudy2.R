@@ -281,7 +281,12 @@ ggplot(cbWomenDF, aes(sample = cbWomenDF$age, colour = factor(cbWomenDF$year))) 
   stat_qq_line()
 
 p <- ggplot(cbWomenDF, aes(factor(cbWomenDF$year), cbWomenDF$age))
-p + geom_violin()
-p + geom_violin() + geom_jitter(height = .5, width = 0, aes(color = 'blue'))
-p + geom_violin(fill = "grey80", colour = "#3366FF")
-p + geom_violin() + geom_point(color='darkblue')
+
+#p + geom_violin(fill = "#c3d3eb", colour = "#c3d3eb") + geom_jitter(height = .5, width = 0, aes(color='#9db7de', size = .25))
+
+p + geom_violin(fill = "#c3d3eb", colour = "#c3d3eb")+
+  geom_point(color='#9db7de', size = .25) +
+  xlab("Race Year") + ylab("Age") +
+  geom_boxplot(width=.25)
+  
+
