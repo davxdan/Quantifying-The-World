@@ -26,6 +26,7 @@ extractResTable =
            year = 1999, sex = "female", file = NULL)
   {
     doc = htmlParse(url, encoding="UTF-8")
+    #doc = htmlParse(url) # uncomment if running on mac
     
     if (year == 2000) {
       ff = getNodeSet(doc, "//font")
@@ -156,7 +157,7 @@ extractVariables =
     eqIndex = grep("^===", file)
     spacerRow = file[eqIndex]
     headerRow = tolower(file[ eqIndex - 1 ])
-    blanks = grep("^[[:blank:]]*$", womenTables[['2005']])
+    #blanks = grep("^[[:blank:]]*$", womenTables[['2005']])
     body = file[ -(1 : eqIndex) ]
     searchLocs = findColLocs(spacerRow)
     locCols = selectCols(varNames, headerRow, searchLocs)
@@ -170,8 +171,8 @@ extractVariables =
 ##Tee hee lets be clever
 womenTables[[3]][1:3]<-womenTables[[4]][1:3]
 womenResMat = lapply(womenTables[1:14], extractVariables)
-#length(womenResMat)
-#sapply(womenResMat, nrow)
+length(womenResMat)
+sapply(womenResMat, nrow) # looks good
 
 #########################Data Cleansing#######################################
 #age = sapply(womenResMat, function(x) as.numeric(x[ , 'ag']))
@@ -190,6 +191,7 @@ womenResMat = lapply(womenTables[1:14], extractVariables)
 # 2008 2009 2010 2011 2012 
 # 0    4    2    0    0 
 
+# only include variables needed for our analysis
 createDF =
   function(Res, year, sex)
   {
@@ -214,9 +216,13 @@ createDF =
 womenDF = mapply(createDF, womenResMat, year = 1999:2012,
                sex = rep("F", 14), SIMPLIFY = FALSE)
 
-#sapply(womenDF, function(x) sum(is.na(x$age)))
+sapply(womenDF, function(x) sum(is.na(x$age)))
 cbWomenDF = do.call(rbind, womenDF)
 
+# verify that NAs introduced by coersion are ok
+badAgeIndex = which(is.na(cbWomenDF$age))
+resMatComb = do.call(rbind,womenResMat)
+resMatTest[badAgeIndex,] # they all originally had blank or invalid values for age
 
 #document records with missing ages
 missingAges<-cbWomenDF[is.na(cbWomenDF$age),]
@@ -225,7 +231,18 @@ missingAges<-cbWomenDF[is.na(cbWomenDF$age),]
 #Remove records with missing ages
 cbWomenDF=cbWomenDF[! is.na(cbWomenDF[,5]),]
 
+# confirm data frame is in a good format
+str(cbWomenDF)
+summary(cbWomenDF)
+colSums(is.na(cbWomenDF))
+
 save(cbWomenDF, file = "cbWomen.rda")
+
+#####################################
+#########Visualizations##############
+
+# can begin here by loading full, clean data frame
+#load(file="cbWomen.rda")
 
 library(RColorBrewer) 
 ls("package:RColorBrewer")
