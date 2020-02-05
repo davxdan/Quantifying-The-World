@@ -221,7 +221,7 @@ cbWomenDF = do.call(rbind, womenDF)
 
 # verify that NAs introduced by coersion are ok
 badAgeIndex = which(is.na(cbWomenDF$age))
-resMatComb = do.call(rbind,womenResMat)
+resMatTest = do.call(rbind,womenResMat)
 resMatTest[badAgeIndex,] # they all originally had blank or invalid values for age
 
 #document records with missing ages
